@@ -39,7 +39,7 @@ rec {
   # build :: Prism s t a b -> b -> t
   #       :: (forall p. Choice p => (Dict p -> p a b) -> (Dict p -> p s t)) -> b -> t
   build =
-    optic:
+    optic: x:
     let
       # Tagged b c = Tagged { runTagged :: c }
       # Here we instantiate 'p' with Tagged.
@@ -50,7 +50,7 @@ rec {
         left = x: { left = x; };
       };
     in
-    optic (_P: x: x) Tagged;
+    optic (_P: x) Tagged;
 
   # preview :: Affine s t a b -> s -> Either a t
   # Affine's preview is just match.
