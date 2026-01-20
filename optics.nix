@@ -113,7 +113,7 @@ rec {
   at =
     key:
     lens (s: if s ? ${key} then s.${key} else null) (
-      s: v: if v == null then lib.removeAttrs s [ key ] else s // { ${key} = v; }
+      s: v: if v == null then builtins.removeAttrs s [ key ] else s // { ${key} = v; }
     );
 
   # ix :: Int -> Affine [a] [b] a b

@@ -69,7 +69,8 @@ rec {
     each
     compose
     attr
-    attr_
+    attr'
+    at
     ix
     _Just
     filtered
