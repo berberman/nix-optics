@@ -85,7 +85,7 @@ rec {
     to: from: l: P:
     P.dimap to from (l P);
 
-  # each :: forall p. Traversing p => Optic p [a] [b] a b
+  # each :: forall p. Traversing p => Optic p (c a) (c b) a b, where c is either List or AttrSet
   each = tr: P: P.traverse (tr P);
 
   # Function composition

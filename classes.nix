@@ -83,7 +83,7 @@ rec {
   #   dimap :: (a -> b) -> (c -> d) -> p b c -> p a d
   #   first :: p a b -> p (a, c) (b, c)
   #   left :: p a b -> p (Either a c) (Either b c)
-  #   traverse :: p a b -> p (c a) (c b) where c is either List or AttrSet
+  #   traverse :: p a b -> p (c a) (c b), where c is either List or AttrSet
   profunctors = rec {
     # Star f d c = Star { runStar :: d -> f c }
     # F is an Applicative Functor dictionary, providing fmap, pure, and liftA2.
