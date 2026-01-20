@@ -1,0 +1,20 @@
+name: "Eval"
+on:
+  pull_request:
+  push:
+jobs:
+  eval:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: cachix/install-nix-action@v31
+        with:
+          nix_path: nixpkgs=channel:nixos-unstable
+      - name: Eval Lib
+        run: nix eval -f ./default.nix
+      - name: Eval Examples
+        run: |
+          for file in examples/*.nix; do
+            echo "Evaluating $file"
+            nix eval -f "$file"
+          done
