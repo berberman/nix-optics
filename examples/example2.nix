@@ -1,5 +1,5 @@
 let
-  optics = import ./default.nix;
+  optics = import ../default.nix;
   inherit (optics)
     view
     set

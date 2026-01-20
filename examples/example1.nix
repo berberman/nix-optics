@@ -1,5 +1,5 @@
 let
-  L = import ./default.nix;
+  L = import ../default.nix;
   inherit (L)
     compose
 
