@@ -23,46 +23,105 @@ These files are well-documented, so please refer to the comments in the code for
 { nix-optics, ... }:
 let
   inherit (nix-optics.lib)
-    sumOf
-    compose
+    view
+    set
     over
+    toListOf
     attr
+    ix
     each
+    compose
     _Just
     non
+    json
+    filtered
     ;
+
+  # A complex nested data structure
   data = {
     users = [
       {
+        id = 1;
         name = "Alice";
-        score = 10;
+        preferences = {
+          theme = "dark";
+          notifications = true;
+        };
+        # Metadata stored as a JSON string
+        meta = "{\"login_count\": 42}";
       }
       {
+        id = 2;
         name = "Bob";
-        score = 20;
-      }
-      {
-        name = "Carol";
-        score = null;
+        preferences = null; # Missing
+        meta = "{\"login_count\": 0}";
       }
     ];
   };
-  totalScore = sumOf (compose [
-    (attr "users")
-    each
-    (attr "score")
-    (non 2333) # Default score if null
-  ]) data;
-  updatedData = over (compose [
-    (attr "users")
-    each
-    (attr "score")
-    _Just # Ignore null scores
-  ]) (score: score + 5) data;
+
+  # Optics
+  users = attr "users";
+  metadata = compose [
+    (attr "meta")
+    json # Automatically converts between JSON and AttrSet
+  ];
+  loginCount = compose [
+    metadata
+    (attr "login_count")
+  ];
+  preferences = compose [
+    (attr "preferences")
+    _Just # Ignore if null
+  ];
+
 in
 {
-  inherit totalScore updatedData;
+
+  # Get Alice's theme
+  aliceTheme = view (compose [
+    users
+    (ix 0)
+    preferences
+    (attr "theme")
+  ]) data;
+  # => "dark"
+
+  # Increment login count for every user
+  updatedLogins = over (compose [
+    users
+    each
+    loginCount
+  ]) (n: n + 1) data;
+  # => Alice's meta becomes "{\"login_count\": 43}"
+
+  # Set Bob's theme to "light", initializing preferences if missing
+  fixBob = set (compose [
+    users
+    (ix 1)
+    (attr "preferences")
+    (non { }) # Replaces null with empty set before we write to it
+    (attr "theme")
+  ]) "light" data;
+  # => Bob.preferences becomes { theme = "light"; }
+
+  # Get a list of all user names
+  allNames = toListOf (compose [
+    users
+    each
+    (attr "name")
+  ]) data;
+  # => [ "Alice" "Bob" ]
+
+  # Get names of users who have logged in at least once
+  activeUsers = toListOf (compose [
+    users
+    each
+    (filtered (u: (view loginCount u) > 0))
+    (attr "name")
+  ]) data;
+  # => [ "Alice" ]
 }
+
 
 ```
 
@@ -70,7 +129,7 @@ in
 
 Types of Optics:
 
-```
+```haskell
 Optics p s t a b = p a b -> p s t
 Lens s t a b = forall p. Strong p => Optics p s t a b
 Prism s t a b = forall p. Choice p => Optics p s t a b

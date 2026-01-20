@@ -109,7 +109,6 @@ let
     (attr "replicas")
   ]) cloudConfig;
   # ==========================================================
-  # README
   data = {
     users = [
       {
@@ -126,13 +125,17 @@ let
       }
     ];
   };
-  totalScore = sumOf (compose [
+  # ==========================================================
+  # Example 5: Get total score of all users
+  example5 = sumOf (compose [
     (attr "users")
     each
     (attr "score")
     (non 2333) # Default score if null
   ]) data;
-  updatedData = over (compose [
+  # ==========================================================
+  # Example 6: Increase each user's score by 5
+  example6 = over (compose [
     (attr "users")
     each
     (attr "score")
@@ -146,9 +149,9 @@ assert
     created_by = "terraform";
     retention_days = 90;
   };
-assert totalScore == 10 + 20 + 2333;
+assert example5 == 10 + 20 + 2333;
 assert
-  updatedData == {
+  example6 == {
     users = [
       {
         name = "Alice";
