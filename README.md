@@ -250,9 +250,12 @@ Let's roughly denote an Optic as `Optic s t a b` in this section for simplicity.
 
 ### Some Common Optics
 
-- `compose :: [Optic] -> Optic`: Optics can be composed as functions naturally.
+- `compose :: [Optic] -> Optic`: Optics can be composed as functions naturally. `compose` just composes a list of optics into one.
   ```nix
-  view (compose [ (attr "a") (attr "b") ]) { a = { b = 99; }; }
+  view (x: (at "a") ((at "b") x)) { a.b = 1; }
+  # => 1
+  view (compose [ (attr "a") (attr "b") ]) { a.b = 1; }
+  # => 1
   ```
 - `attr :: String -> Lens AttrSet AttrSet a b`: Lens focusing on an attribute of an attribute set. Fails if the attribute does not exist.
   ```
