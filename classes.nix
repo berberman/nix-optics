@@ -83,7 +83,7 @@ rec {
   #   dimap :: (a -> b) -> (c -> d) -> p b c -> p a d
   #   first :: p a b -> p (a, c) (b, c)
   #   left :: p a b -> p (Either a c) (Either b c)
-  #   traverse :: p a b -> p [a] [b]
+  #   traverse :: p a b -> p (c a) (c b) where c is either List or AttrSet
   profunctors = rec {
     # Star f d c = Star { runStar :: d -> f c }
     # F is an Applicative Functor dictionary, providing fmap, pure, and liftA2.
@@ -116,9 +116,16 @@ rec {
 
       # instance Traversing (Star f)
       # traverse :: (a -> f b) -> [a] -> f [b]
+      # traverse :: (a -> f b) -> AttrSet -> f AttrSet
       # TODO: Performance? Now unused and being overridden in specific instances.
       traverse =
-        afb: list: lib.foldr (a: acc: F.liftA2 (b: bs: [ b ] ++ bs) (afb a) acc) (F.pure [ ]) list;
+        afb: list:
+        if builtins.isAttrs list then
+          lib.foldr (k: acc: F.liftA2 (b: bs: bs // { ${k} = b; }) (afb list.${k}) acc) (F.pure { }) (
+            builtins.attrNames list
+          )
+        else
+          lib.foldr (a: acc: F.liftA2 (b: bs: [ b ] ++ bs) (afb a) acc) (F.pure [ ]) list;
     };
 
     # The function arrow (->), or:
@@ -126,7 +133,8 @@ rec {
     Arrow = Star functors.Identity // {
       # Specialized for Identity
       # traverse :: (a -> b) -> [a] -> [b]
-      traverse = h: list: map h list;
+      # traverse :: (a -> b) -> AttrSet -> AttrSet
+      traverse = h: s: if builtins.isAttrs s then builtins.mapAttrs (_: v: h v) s else map h s;
     };
 
     # Forget r a b = Forget { runForget :: a -> r }
@@ -137,8 +145,14 @@ rec {
       Star (functors.Constant monoid)
       // {
         # Specialized for Constant (thanks to the associativity)
-        # traverse :: (a -> r) -> [a] -> r
-        traverse = h: list: builtins.foldl' monoid.combine monoid.empty (map h list);
+        # traverse :: Monoid r => (a -> r) -> [a] -> r
+        # traverse :: Monoid r => (a -> r) -> AttrSet -> r
+        traverse =
+          h: s:
+          if builtins.isAttrs s then
+            builtins.foldl' monoid.combine monoid.empty (map h (builtins.attrValues s))
+          else
+            builtins.foldl' monoid.combine monoid.empty (map h s);
       };
   };
 

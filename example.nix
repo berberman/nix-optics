@@ -35,7 +35,7 @@ let
       };
       green = {
         active = false;
-        replicas = 0;
+        replicas = 1;
         version = "v1.1";
       };
     };
@@ -102,6 +102,13 @@ let
     (attr "retention_days")
   ]) (x: x + 60) cloudConfig;
   # ==========================================================
+  # Example 4: Count total replicas across all deployments
+  totalReplicas = sumOf (compose [
+    (attr "deploy")
+    each
+    (attr "replicas")
+  ]) cloudConfig;
+  # ==========================================================
   # README
   data = {
     users = [
@@ -139,6 +146,24 @@ assert
     created_by = "terraform";
     retention_days = 90;
   };
+assert totalScore == 10 + 20 + 2333;
+assert
+  updatedData == {
+    users = [
+      {
+        name = "Alice";
+        score = 15;
+      }
+      {
+        name = "Bob";
+        score = 25;
+      }
+      {
+        name = "Carol";
+        score = null;
+      }
+    ];
+  };
+assert totalReplicas == 4;
 {
-  inherit updatedData;
 }
