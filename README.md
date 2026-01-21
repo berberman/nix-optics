@@ -258,8 +258,8 @@ Let's roughly denote an Optic as `Optic s t a b` in this section for simplicity.
   # => 1
   ```
 - `attr :: String -> Lens AttrSet AttrSet a b`: Lens focusing on an attribute of an attribute set. Fails if the attribute does not exist.
-  ```
-  set (attr "foo) 42 { foo = 0; bar = 1; }
+  ```nix
+  set (attr "foo") 42 { foo = 0; bar = 1; }
   # => { foo = 42; bar = 1; }
   ```
 - `attr' :: String -> Affine AttrSet AttrSet a b`: Affine focusing on an attribute of an attribute set. Does nothing if the attribute does not exist. Note: it never creates new attributes.
