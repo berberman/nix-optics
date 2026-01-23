@@ -139,4 +139,7 @@ rec {
 
   # non :: a -> Iso (a?) (a?) a a
   non = def: iso (x: if x == null then def else x) (y: if y == def then null else y);
+
+  # path :: [String] -> Lens AttrSet AttrSet a b
+  path = keys: compose (builtins.map attr keys);
 }

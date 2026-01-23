@@ -257,11 +257,19 @@ Let's roughly denote an Optic as `Optic s t a b` in this section for simplicity.
   view (compose [ (attr "a") (attr "b") ]) { a.b = 1; }
   # => 1
   ```
+
 - `attr :: String -> Lens AttrSet AttrSet a b`: Lens focusing on an attribute of an attribute set. Fails if the attribute does not exist.
   ```nix
   set (attr "foo") 42 { foo = 0; bar = 1; }
   # => { foo = 42; bar = 1; }
   ```
+
+- `path :: [String] -> Lens AttrSet AttrSet a b` : A list of `attr`s composed together.
+  ```nix
+  set (path [ "a" "b" "c" ]) 233 { a.b = {c = 0; d = 1; }; }
+  # => { a.b = { c = 233; d = 1; }; }
+  ```
+
 - `attr' :: String -> Affine AttrSet AttrSet a b`: Affine focusing on an attribute of an attribute set. Does nothing if the attribute does not exist. Note: it never creates new attributes.
   ```nix
   set (attr' "a") 2 { a = 1; }

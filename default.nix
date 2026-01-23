@@ -29,6 +29,8 @@ rec {
     optic (_P: f) (profunctors.Forget monoid);
 
   # view :: (forall p. Traversing p => Optic p s t a b) -> s -> a?
+  # Note: This is not the usual definition of 'view' which only works for Lens.
+  #       Here it uses Traversal which works for all optics in this library, and is called 'preview' elsewhere.
   view = optic: foldMapOf optic monoids.first (x: x);
 
   # match :: Prism s t a b -> s -> Either a t
@@ -77,5 +79,6 @@ rec {
     iso
     json
     non
+    path
     ;
 }
